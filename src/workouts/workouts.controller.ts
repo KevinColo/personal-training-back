@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, Param, Delete } from '@nestjs/common';
-import { Workout, WorkoutsService } from './workouts.service';
+import { WorkoutsService } from './workouts.service';
+import { Workout } from './workout.entity';
 
 @Controller('workouts')
 export class WorkoutsController {

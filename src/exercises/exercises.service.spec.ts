@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExercisesService, Exercise } from './exercises.service';
+import { ExercisesService } from './exercises.service';
 import { HttpException } from '@nestjs/common';
+import { Exercise } from './exercise.entity';
 
 describe('ExercisesService', () => {
   let service: ExercisesService;

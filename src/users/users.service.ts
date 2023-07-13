@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
-
-export class User {
-  constructor(public id: number, public name: string, public email: string) {}
-}
+import { User } from './user.entity';
 
 @Injectable()
 export class UsersService {

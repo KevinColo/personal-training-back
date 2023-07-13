@@ -16,5 +16,7 @@ describe('WorkoutsController', () => {
     workoutsService = module.get<WorkoutsService>(WorkoutsService);
   });
 
-  // Here you can add your tests
+  it('should be defined', () => {
+    expect(workoutsController).toBeDefined();
+  });
 });

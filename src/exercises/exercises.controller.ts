@@ -6,7 +6,8 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ExercisesService, Exercise } from './exercises.service';
+import { ExercisesService } from './exercises.service';
+import { Exercise } from './exercise.entity';
 
 @Controller('exercises')
 export class ExercisesController {

@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ExercisesController } from './exercises.controller';
-import { Exercise, ExercisesService } from './exercises.service';
+import { ExercisesService } from './exercises.service';
+import { Exercise } from './exercise.entity';
 
 describe('ExercisesController', () => {
   let controller: ExercisesController;
