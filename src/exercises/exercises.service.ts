@@ -1,22 +1,46 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Exercise } from './exercise.entity';
+import { DeleteResult, FindManyOptions, Repository } from 'typeorm';
 
 @Injectable()
 export class ExercisesService {
-  private readonly exercises: Exercise[] = [];
+  constructor(
+    @InjectRepository(Exercise)
+    private readonly exerciseRepository: Repository<Exercise>,
+  ) {}
 
-  create(exercise: Exercise) {
-    const found = this.exercises.find((ex) => ex.name === exercise.name);
-    if (found) {
-      throw new HttpException(
-        'Exercise already exists',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    this.exercises.push(exercise);
+  async create(exercise: Exercise): Promise<Exercise> {
+    return this.exerciseRepository.save(exercise);
   }
 
-  findAll(): Exercise[] {
-    return this.exercises;
+  async delete(id: number): Promise<DeleteResult> {
+    const result = await this.exerciseRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Exercise with ID ${id} not found`);
+    }
+    return result;
+  }
+
+  async findAll(
+    muscleGroup?: string,
+    intensity?: string,
+    difficulty?: string,
+  ): Promise<Exercise[]> {
+    const options: FindManyOptions<Exercise> = {};
+
+    if (muscleGroup) {
+      options.where = { muscleGroup };
+    }
+
+    if (intensity) {
+      options.where = { ...options.where, intensity };
+    }
+
+    if (difficulty) {
+      options.where = { ...options.where, difficulty };
+    }
+
+    return this.exerciseRepository.find(options);
   }
 }
