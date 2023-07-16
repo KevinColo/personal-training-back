@@ -7,12 +7,12 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() user: User): void {
-    this.usersService.create(user);
+  create(@Body() user: User): Promise<User> {
+    return this.usersService.create(user);
   }
 
   @Get()
-  findAll(): User[] {
+  findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
 }
