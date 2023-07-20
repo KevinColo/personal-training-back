@@ -22,13 +22,15 @@ import { User } from './users/user.entity';
 import { ExercisesService } from './exercises/exercises.service';
 import { UsersController } from './users/users.controller';
 import { UsersService } from './users/users.service';
-import { ExerciseRepository } from './exercises/exercise.repository';
 import { UserRepository } from './users/user.repository';
+import { WorkoutsModule } from './workouts/workouts.module';
+import { Workout } from './workouts/workout.entity';
 
 @Module({
   imports: [
     UsersModule,
     ExercisesModule,
+    WorkoutsModule,
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -44,12 +46,7 @@ import { UserRepository } from './users/user.repository';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([
-      User,
-      UserRepository,
-      Exercise,
-      ExerciseRepository,
-    ]),
+    TypeOrmModule.forFeature([User, UserRepository, Exercise, Workout]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: 'VOTRE_CLE_SECRETE',

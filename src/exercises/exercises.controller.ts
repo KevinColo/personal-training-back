@@ -27,7 +27,7 @@ export class ExercisesController {
 
   @Post()
   @UsePipes(new ValidationPipe())
-  @UseGuards(AuthGuard('jwt')) // Exige une authentification JWT
+  //@UseGuards(AuthGuard('jwt')) // Exige une authentification JWT
   create(@Body() exercise: Exercise): Promise<Exercise> {
     return this.exercisesService.create(exercise);
   }

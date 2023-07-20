@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { ExercisesService } from './exercises.service';
 import { ExercisesController } from './exercises.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ExerciseRepository } from './exercise.repository';
 import { Exercise } from './exercise.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Exercise, ExerciseRepository])],
+  imports: [TypeOrmModule.forFeature([Exercise])],
   providers: [ExercisesService],
   controllers: [ExercisesController],
 })

@@ -3,7 +3,6 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 export class Exercise {
   @PrimaryGeneratedColumn()
-  @IsNotEmpty()
   public id: number;
 
   @Column()

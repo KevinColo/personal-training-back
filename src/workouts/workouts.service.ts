@@ -1,23 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
+
 import { Workout } from './workout.entity';
 
 @Injectable()
 export class WorkoutsService {
-  private workouts: Workout[] = [];
+  constructor(
+    @InjectRepository(Workout)
+    private readonly workoutRepository: Repository<Workout>,
+  ) {}
 
-  create(workout: Workout) {
-    this.workouts.push(workout);
+  async create(workout: Workout): Promise<Workout> {
+    return this.workoutRepository.save(workout);
   }
 
-  findAll() {
-    return this.workouts;
+  async findAll(): Promise<Workout[]> {
+    return this.workoutRepository.find();
   }
 
-  findOne(id: number) {
-    return this.workouts.find((workout) => workout.id === id);
+  async findOne(id: number) {
+    const options: FindManyOptions<Workout> = {};
+    options.where = { id };
+    return this.workoutRepository.findOne(options);
   }
 
-  remove(id: number) {
-    this.workouts = this.workouts.filter((workout) => workout.id !== id);
+  async remove(id: number) {
+    const result = await this.workoutRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Exercise with ID ${id} not found`);
+    }
+    return result;
   }
 }
