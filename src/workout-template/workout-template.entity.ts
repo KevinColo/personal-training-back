@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsInt, IsIn } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, IsIn, IsPositive } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -31,10 +31,15 @@ export class WorkoutTemplate {
   @IsInt()
   public restTime: number;
 
-  @Column()
   @IsNotEmpty()
   @IsInt()
-  public numReps: number;
+  @IsPositive()
+  public numExercises: number;
+
+  @IsNotEmpty()
+  @IsInt()
+  @IsPositive()
+  public restBetweenRounds: number;
 
   @Column()
   @IsNotEmpty()
@@ -47,7 +52,6 @@ export class WorkoutTemplate {
     description: string,
     numRounds: number,
     workTime: number,
-    restTime: number,
     numReps: number,
     intensity: string,
   ) {
@@ -56,8 +60,6 @@ export class WorkoutTemplate {
     this.description = description;
     this.numRounds = numRounds;
     this.workTime = workTime;
-    this.restTime = restTime;
-    this.numReps = numReps;
     this.intensity = intensity;
   }
 }
