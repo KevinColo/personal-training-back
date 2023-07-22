@@ -1,14 +1,15 @@
 import { Body, Controller, Get, Post, Param, Delete } from '@nestjs/common';
 import { WorkoutsService } from './workouts.service';
 import { Workout } from './workout.entity';
+import { WorkoutModel } from './workout.model';
 
 @Controller('workouts')
 export class WorkoutsController {
   constructor(private readonly workoutsService: WorkoutsService) {}
 
   @Post()
-  create(@Body() workout: Workout) {
-    return this.workoutsService.create(workout);
+  create(@Body() training: WorkoutModel): Promise<Workout> {
+    return this.workoutsService.generateWorkout(training);
   }
 
   @Get()

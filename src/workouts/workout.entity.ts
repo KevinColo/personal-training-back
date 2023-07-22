@@ -8,6 +8,7 @@ import {
 import { Type } from 'class-transformer';
 import { Exercise } from '../exercises/exercise.entity';
 import { Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { WorkoutTemplate } from '../workout-template/workout-template.entity';
 
 @Entity()
 export class Workout {
@@ -20,22 +21,14 @@ export class Workout {
 
   @IsNotEmpty()
   @IsInt()
-  public templateId: number;
+  public workoutTemplate: WorkoutTemplate;
+
+  @IsNotEmpty()
+  @IsInt()
+  public duration: number;
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => Exercise)
-  public exercises: Exercise[];
-
-  constructor(
-    id: number,
-    name: string,
-    templateId: number,
-    exercises: Exercise[],
-  ) {
-    this.id = id;
-    this.name = name;
-    this.templateId = templateId;
-    this.exercises = exercises;
-  }
+  public exercises: Exercise[] | number;
 }

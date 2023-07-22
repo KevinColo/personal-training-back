@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsString, IsInt, IsIn, IsPositive } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsInt,
+  IsIn,
+  IsPositive,
+  IsOptional,
+} from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -36,7 +43,8 @@ export class WorkoutTemplate {
   @IsPositive()
   public numExercises: number;
 
-  @IsNotEmpty()
+  @Column({ nullable: true })
+  @IsOptional()
   @IsInt()
   @IsPositive()
   public restBetweenRounds: number;
@@ -61,5 +69,10 @@ export class WorkoutTemplate {
     this.numRounds = numRounds;
     this.workTime = workTime;
     this.intensity = intensity;
+  }
+
+  getTotalTime() {
+    // Temps total pour un tour (ou cycle) = (temps de travail pour chaque niveau de la pyramide + temps de repos) * nombre d'exercices + repos entre les tours
+    return this.workTime * this.numRounds;
   }
 }

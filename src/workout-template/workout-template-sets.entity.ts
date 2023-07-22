@@ -23,4 +23,12 @@ export class WorkoutTemplateSetsEntity extends WorkoutTemplate {
     super(id, name, description, numRounds, workTime, numExercises, intensity);
     this.numSets = numSets;
   }
+
+  getTotalTime() {
+    // Temps total pour un tour (ou cycle) = (temps de travail + temps de repos) * nombre d'exercices + repos entre les tours
+    return (
+      (this.workTime + this.restTime) * this.numExercises +
+      this.restBetweenRounds
+    );
+  }
 }
