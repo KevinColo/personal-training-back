@@ -29,7 +29,7 @@ export class ExercisesService {
     return result;
   }
 
-  async findSome(ids: number[]): Promise<Exercise[]> {
+  async findSome(ids: (number[] | number)[]): Promise<Exercise[]> {
     const findOptions: FindOptionsWhere<Exercise> = { id: In(ids) };
     return await this.exerciseRepository.findBy(findOptions);
   }

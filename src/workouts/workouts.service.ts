@@ -7,6 +7,7 @@ import { ExercisesService } from '../exercises/exercises.service';
 import { WorkoutTemplatesService } from '../workout-template/workout-templates.service';
 import { WorkoutModel } from './workout.model';
 import { WorkoutTemplate } from '../workout-template/workout-template.entity';
+import { Exercise } from '../exercises/exercise.entity';
 
 @Injectable()
 export class WorkoutsService {
@@ -39,25 +40,57 @@ export class WorkoutsService {
     //   filteredExercises,
     //   userPreferences.numExercises,
     // );
+    const exercisesToUse = userPreferences.exercisesId;
 
-    // Create new workout
-    const workout = new Workout();
-    workout.exercisesId = userPreferences.exercisesId;
-    workout.duration = userPreferences.duration;
-    workout.name = 'userPreferences.duration';
+    // Function to generate a list of exercises, using each one once before repeating
+    const generateExerciseList = (
+      exercises: number[],
+      total: number,
+      perRound: number,
+    ): number[][] => {
+      let result: number[] = [];
+      while (result.length < total) {
+        const shuffledExercises = [...exercises].sort(
+          () => 0.5 - Math.random(),
+        );
+        result = [...result, ...shuffledExercises];
+      }
+      result = result.slice(0, total);
+
+      const rounds: number[][] = [];
+      for (let i = 0; i < total; i += perRound) {
+        rounds.push(result.slice(i, i + perRound));
+      }
+      return rounds;
+    };
+
     // Retrieve all workout templates from the database
     const allWorkoutTemplates = await this.workoutTemplatesService.findAll();
     // Filter workout templates based on user's difficulty preference
+
     const filteredWorkoutTemplates: WorkoutTemplate[] =
       allWorkoutTemplates.filter(
         (workoutTemplate) =>
           workoutTemplate.intensity === userPreferences.difficulty,
       );
-
     // Choose random workout template
     const chosenWorkoutTemplate = this.chooseRandomItem(
       filteredWorkoutTemplates,
     );
+
+    const totalExercises =
+      chosenWorkoutTemplate.numRounds * chosenWorkoutTemplate.numExercisesRound;
+    const chosenExercises = generateExerciseList(
+      exercisesToUse,
+      totalExercises,
+      chosenWorkoutTemplate.numExercisesRound,
+    );
+
+    // Create new workout
+    const workout = new Workout();
+    workout.exercisesId = chosenExercises;
+    workout.duration = userPreferences.duration;
+    workout.name = 'userPreferences.duration';
     workout.workoutTemplate = chosenWorkoutTemplate;
     // Calculate total workout time and adjust number of rounds if necessary
     const totalWorkoutTime = chosenWorkoutTemplate.getTotalTime();
@@ -102,7 +135,9 @@ export class WorkoutsService {
     }
 
     // Retrieve exercises
-    const exercises = await this.exercisesService.findSome(workout.exercisesId);
+    const exercises: Exercise[] = await this.exercisesService.findSome(
+      workout.exercisesId,
+    );
 
     // Build the workout
     const workoutRounds = [];

@@ -31,7 +31,7 @@ export class Workout {
   @Column('simple-array')
   @IsNotEmpty()
   @IsArray()
-  public exercisesId: number[];
+  public exercisesId: (number[] | number)[];
 
   public exercises: Exercise[];
 }
