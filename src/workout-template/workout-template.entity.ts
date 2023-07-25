@@ -43,6 +43,11 @@ export class WorkoutTemplate {
   @IsPositive()
   public numExercises: number;
 
+  @Column()
+  @IsNotEmpty()
+  @IsInt()
+  public numExercisesRound: number;
+
   @Column({ nullable: true })
   @IsOptional()
   @IsInt()
@@ -73,6 +78,6 @@ export class WorkoutTemplate {
 
   getTotalTime() {
     // Temps total pour un tour (ou cycle) = (temps de travail pour chaque niveau de la pyramide + temps de repos) * nombre d'exercices + repos entre les tours
-    return this.workTime * this.numRounds;
+    return (this.workTime + this.restTime) * this.numRounds;
   }
 }

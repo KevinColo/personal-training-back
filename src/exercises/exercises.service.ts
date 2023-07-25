@@ -1,6 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, FindManyOptions, Repository } from 'typeorm';
+import {
+  DeleteResult,
+  FindManyOptions,
+  FindOptionsWhere,
+  In,
+  Repository,
+} from 'typeorm';
 
 import { Exercise } from './exercise.entity';
 
@@ -21,6 +27,11 @@ export class ExercisesService {
       throw new NotFoundException(`Exercise with ID ${id} not found`);
     }
     return result;
+  }
+
+  async findSome(ids: number[]): Promise<Exercise[]> {
+    const findOptions: FindOptionsWhere<Exercise> = { id: In(ids) };
+    return await this.exerciseRepository.findBy(findOptions);
   }
 
   async findAll(

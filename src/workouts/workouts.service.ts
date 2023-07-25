@@ -1,13 +1,8 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Repository } from 'typeorm';
 
 import { Workout } from './workout.entity';
-import { Exercise } from '../exercises/exercise.entity';
 import { ExercisesService } from '../exercises/exercises.service';
 import { WorkoutTemplatesService } from '../workout-template/workout-templates.service';
 import { WorkoutModel } from './workout.model';
@@ -22,70 +17,59 @@ export class WorkoutsService {
     private readonly workoutTemplatesService: WorkoutTemplatesService,
   ) {}
 
-  async generateWorkout(training: WorkoutModel): Promise<Workout> {
-    let chosenExercises: Exercise[];
-    if (typeof training.exercises === 'number') {
-      // Assurez-vous que le nombre d'exercices est valide
-      if (training.exercises < 4 || training.exercises > 20) {
-        throw new BadRequestException(
-          'Number of exercises must be between 4 and 20.',
-        );
-      }
-      // Récupérez tous les exercices
-      const allExercises = await this.exercisesService.findAll();
-      // Filtrer les exercices en fonction de la difficulté
-      const filteredExercises = allExercises.filter(
-        (exercise) => exercise.difficulty === training.difficulty,
-      );
-      // Vérifiez qu'il y a suffisamment d'exercices
-      if (filteredExercises.length < training.exercises) {
-        throw new BadRequestException(
-          'Not enough exercises for the requested difficulty.',
-        );
-      }
-      // Choisissez aléatoirement des exercices
-      chosenExercises = this.chooseRandomItems(
-        filteredExercises,
-        training.exercises,
-      );
-    } else {
-      // L'utilisateur a fourni une liste spécifique d'exercices
-      chosenExercises = training.exercises;
-    }
-    if (training.duration < 8 || training.duration > 45) {
-      throw new BadRequestException(
-        'Workout duration must be between 8 and 45 minutes.',
-      );
-    }
-    // Récupérez tous les exercices et templates de workout
-    const allWorkoutTemplates = await this.workoutTemplatesService.findAll();
-    // Filtrer les exercices et les templates de workout en fonction de la difficulté
-    //TODO si un nombre d'xercice est choisi au lieu d'une liste
-    // const allExercises = await this.exercisesService.findAll();
-    // const filteredExercises = allExercises.filter(
-    //  (exercise) => exercise.difficulty === training.difficulty,
+  // Generate workout based on user preferences
+  async generateWorkout(userPreferences: WorkoutModel): Promise<Workout> {
+    // Retrieve all exercises from the database
+    //const allExercises = await this.exercisesService.findAll();
+
+    //// Filter exercises based on user's difficulty preference
+    //const filteredExercises = allExercises.filter(
+    //  (exercise) => exercise.difficulty === userPreferences.difficulty,
     //);
-    const filteredWorkoutTemplates = allWorkoutTemplates.filter(
-      (workoutTemplate) => workoutTemplate.intensity === training.difficulty,
-    );
-    // TODO gérer les exception sur les exercices et les templates
-    // Choisissez aléatoirement des exercices et un template de workout
-    const chosenWorkoutTemplate: WorkoutTemplate = this.chooseRandomItem(
+
+    //// Check that there are enough exercises for the requested difficulty
+    //if (filteredExercises.length < userPreferences.exercises.length) {
+    //  throw new BadRequestException(
+    //    'Not enough exercises for the requested difficulty.',
+    //  );
+    //}
+
+    // Choose random exercises based on user's preference
+    // const chosenExercises = this.chooseRandomItems(
+    //   filteredExercises,
+    //   userPreferences.numExercises,
+    // );
+
+    // Create new workout
+    const workout = new Workout();
+    workout.exercisesId = userPreferences.exercisesId;
+    workout.duration = userPreferences.duration;
+    workout.name = 'userPreferences.duration';
+    // Retrieve all workout templates from the database
+    const allWorkoutTemplates = await this.workoutTemplatesService.findAll();
+    // Filter workout templates based on user's difficulty preference
+    const filteredWorkoutTemplates: WorkoutTemplate[] =
+      allWorkoutTemplates.filter(
+        (workoutTemplate) =>
+          workoutTemplate.intensity === userPreferences.difficulty,
+      );
+
+    // Choose random workout template
+    const chosenWorkoutTemplate = this.chooseRandomItem(
       filteredWorkoutTemplates,
     );
-    // Créez le workout
-    const workout = new Workout();
-    workout.exercises = chosenExercises;
     workout.workoutTemplate = chosenWorkoutTemplate;
-    // Calculez le temps total du workout et ajustez le nombre de rounds si nécessaire
+    // Calculate total workout time and adjust number of rounds if necessary
     const totalWorkoutTime = chosenWorkoutTemplate.getTotalTime();
-    if (totalWorkoutTime > training.duration) {
-      const ratio = training.duration / totalWorkoutTime;
+    if (totalWorkoutTime > userPreferences.duration) {
+      const ratio = userPreferences.duration / totalWorkoutTime;
       chosenWorkoutTemplate.numRounds = Math.floor(
         chosenWorkoutTemplate.numRounds * ratio,
       );
     }
-    // Retournez le workout généré
+
+    // Save and return generated workout
+    await this.workoutRepository.save(workout);
     return workout;
   }
 
@@ -111,7 +95,35 @@ export class WorkoutsService {
   async findOne(id: number) {
     const options: FindManyOptions<Workout> = {};
     options.where = { id };
-    return this.workoutRepository.findOne(options);
+    options.relations = ['workoutTemplate'];
+    const workout = await this.workoutRepository.findOne(options);
+    if (!workout) {
+      throw new NotFoundException(`Workout with ID ${id} not found`);
+    }
+
+    // Retrieve exercises
+    const exercises = await this.exercisesService.findSome(workout.exercisesId);
+
+    // Build the workout
+    const workoutRounds = [];
+    for (let round = 0; round < workout.workoutTemplate.numRounds; round++) {
+      const roundExercises = [];
+      for (
+        let exerciseIndex = 0;
+        exerciseIndex < workout.workoutTemplate.numExercisesRound;
+        exerciseIndex++
+      ) {
+        // Use exercises in order, and start over from the beginning if necessary
+        const exercise = exercises[exerciseIndex % exercises.length];
+        roundExercises.push(exercise.id); // Store only the exercise ID
+      }
+      workoutRounds.push(roundExercises);
+    }
+
+    // Add rounds of exercises to the workout
+    workout.exercisesId = workoutRounds; // Store only the exercise IDs
+
+    return workout;
   }
 
   async remove(id: number) {

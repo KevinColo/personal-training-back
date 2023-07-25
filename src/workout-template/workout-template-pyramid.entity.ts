@@ -1,39 +1,52 @@
 import { IsNotEmpty, IsInt, IsPositive } from 'class-validator';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
 import { WorkoutTemplate } from './workout-template.entity';
+import { Exercise } from '../exercises/exercise.entity';
 
 @Entity()
 export class WorkoutTemplatePyramidEntity extends WorkoutTemplate {
-  @Column()
-  @IsNotEmpty()
-  @IsInt()
-  @IsPositive()
-  public levelOneWorkTime: number; // Temps de travail pour le niveau 1
+  @ManyToOne((_type) => Exercise)
+  public levelOneExercise1: Exercise;
+
+  @ManyToOne((_type) => Exercise)
+  public levelOneExercise2: Exercise;
+
+  @ManyToOne((_type) => Exercise)
+  public levelTwoExercise1: Exercise;
+
+  @ManyToOne((_type) => Exercise)
+  public levelTwoExercise2: Exercise;
+
+  @ManyToOne((_type) => Exercise)
+  public levelThreeExercise1: Exercise;
+
+  @ManyToOne((_type) => Exercise)
+  public levelThreeExercise2: Exercise;
 
   @Column()
   @IsNotEmpty()
   @IsInt()
   @IsPositive()
-  public levelTwoWorkTime: number; // Temps de travail pour le niveau 2
+  public levelOneWorkTime: number;
 
   @Column()
   @IsNotEmpty()
   @IsInt()
   @IsPositive()
-  public levelThreeWorkTime: number; // Temps de travail pour le niveau 3
+  public levelTwoWorkTime: number;
 
   @Column()
   @IsNotEmpty()
   @IsInt()
   @IsPositive()
-  public restTime: number; // Temps de repos après chaque exercice
+  public levelThreeWorkTime: number;
 
   @Column()
   @IsNotEmpty()
   @IsInt()
   @IsPositive()
-  public numCycles: number; // Nombre de fois que le cycle (1 min x 2, 45 sec x 2, 30 sec x 2) est répété
+  public numCycles: number;
 
   constructor(
     id: number,
@@ -49,6 +62,12 @@ export class WorkoutTemplatePyramidEntity extends WorkoutTemplate {
     levelTwoWorkTime: number,
     levelThreeWorkTime: number,
     restTime: number,
+    levelOneExercise1: Exercise,
+    levelOneExercise2: Exercise,
+    levelTwoExercise1: Exercise,
+    levelTwoExercise2: Exercise,
+    levelThreeExercise1: Exercise,
+    levelThreeExercise2: Exercise,
   ) {
     super(id, name, description, numRounds, workTime, numExercises, intensity);
     this.levelOneWorkTime = levelOneWorkTime;
@@ -56,16 +75,21 @@ export class WorkoutTemplatePyramidEntity extends WorkoutTemplate {
     this.levelThreeWorkTime = levelThreeWorkTime;
     this.restTime = restTime;
     this.numCycles = numCycles;
+    this.levelOneExercise1 = levelOneExercise1;
+    this.levelOneExercise2 = levelOneExercise2;
+    this.levelTwoExercise1 = levelTwoExercise1;
+    this.levelTwoExercise2 = levelTwoExercise2;
+    this.levelThreeExercise1 = levelThreeExercise1;
+    this.levelThreeExercise2 = levelThreeExercise2;
   }
 
   getTotalTime() {
-    // Temps total pour un tour (ou cycle) = (temps de travail pour chaque niveau de la pyramide + temps de repos) * nombre d'exercices + repos entre les tours
     return (
       (this.levelOneWorkTime +
         this.levelTwoWorkTime +
         this.levelThreeWorkTime +
         this.restTime) *
-        this.numExercises +
+        this.numCycles +
       this.restBetweenRounds
     );
   }

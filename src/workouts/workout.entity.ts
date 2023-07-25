@@ -1,34 +1,37 @@
+import { IsNotEmpty, IsString, IsArray, IsInt } from 'class-validator';
 import {
-  IsNotEmpty,
-  IsString,
-  ValidateNested,
-  IsArray,
-  IsInt,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { Exercise } from '../exercises/exercise.entity';
-import { Entity, PrimaryGeneratedColumn } from 'typeorm';
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { WorkoutTemplate } from '../workout-template/workout-template.entity';
+import { Exercise } from '../exercises/exercise.entity';
 
 @Entity()
 export class Workout {
   @PrimaryGeneratedColumn()
   public id: number;
 
+  @Column()
   @IsNotEmpty()
   @IsString()
   public name: string;
 
-  @IsNotEmpty()
-  @IsInt()
+  @ManyToOne(() => WorkoutTemplate, { eager: true })
+  @JoinColumn({ name: 'workoutTemplateId' })
   public workoutTemplate: WorkoutTemplate;
 
+  @Column()
   @IsNotEmpty()
   @IsInt()
   public duration: number;
 
+  @Column('simple-array')
+  @IsNotEmpty()
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => Exercise)
-  public exercises: Exercise[] | number;
+  public exercisesId: number[];
+
+  public exercises: Exercise[];
 }
