@@ -42,28 +42,6 @@ export class WorkoutsService {
     // );
     const exercisesToUse = userPreferences.exercisesId;
 
-    // Function to generate a list of exercises, using each one once before repeating
-    const generateExerciseList = (
-      exercises: number[],
-      total: number,
-      perRound: number,
-    ): number[][] => {
-      let result: number[] = [];
-      while (result.length < total) {
-        const shuffledExercises = [...exercises].sort(
-          () => 0.5 - Math.random(),
-        );
-        result = [...result, ...shuffledExercises];
-      }
-      result = result.slice(0, total);
-
-      const rounds: number[][] = [];
-      for (let i = 0; i < total; i += perRound) {
-        rounds.push(result.slice(i, i + perRound));
-      }
-      return rounds;
-    };
-
     // Retrieve all workout templates from the database
     const allWorkoutTemplates = await this.workoutTemplatesService.findAll();
     // Filter workout templates based on user's difficulty preference
@@ -78,9 +56,10 @@ export class WorkoutsService {
       filteredWorkoutTemplates,
     );
 
+    // Function to generate a list of exercises, using each one once before repeating
     const totalExercises =
       chosenWorkoutTemplate.numRounds * chosenWorkoutTemplate.numExercisesRound;
-    const chosenExercises = generateExerciseList(
+    const chosenExercises = this.generateExerciseList(
       exercisesToUse,
       totalExercises,
       chosenWorkoutTemplate.numExercisesRound,
@@ -105,6 +84,25 @@ export class WorkoutsService {
     await this.workoutRepository.save(workout);
     return workout;
   }
+
+  generateExerciseList = (
+    exercises: number[],
+    total: number,
+    perRound: number,
+  ): number[][] => {
+    let result: number[] = [];
+    while (result.length < total) {
+      const shuffledExercises = [...exercises].sort(() => 0.5 - Math.random());
+      result = [...result, ...shuffledExercises];
+    }
+    result = result.slice(0, total);
+
+    const rounds: number[][] = [];
+    for (let i = 0; i < total; i += perRound) {
+      rounds.push(result.slice(i, i + perRound));
+    }
+    return rounds;
+  };
 
   chooseRandomItems<T>(items: T[], numItems: number): T[] {
     const chosenItems = [];

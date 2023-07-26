@@ -26,7 +26,12 @@ describe('WorkoutService', () => {
         },
         {
           provide: getRepositoryToken(Workout),
-          useClass: Repository,
+          useValue: {
+            find: jest.fn(),
+            findOne: jest.fn(),
+            delete: jest.fn(),
+            save: jest.fn(),
+          },
         },
         {
           provide: getRepositoryToken(WorkoutTemplate),
@@ -51,10 +56,20 @@ describe('WorkoutService', () => {
       jest
         .spyOn(service, 'findAll')
         .mockResolvedValue([{ exercisesId: [1, 2] } as Workout]);
-
+      jest.spyOn(workoutTemplateService, 'findAll').mockResolvedValue([
+        {
+          numRounds: 4,
+          intensity: 'Hard',
+          numExercisesRound: 4,
+          getTotalTime: () => 100,
+        } as WorkoutTemplate,
+      ]);
       // Assert
       await expect(
-        service.generateWorkout({ difficulty: 'Hard' } as WorkoutModel),
+        service.generateWorkout({
+          difficulty: 'Hard',
+          exercisesId: [1, 2, 3],
+        } as WorkoutModel),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -65,16 +80,18 @@ describe('WorkoutService', () => {
         .mockResolvedValue([
           { exercisesId: [1, 2], duration: 3000 } as Workout,
         ]);
-      jest
-        .spyOn(workoutTemplateService, 'findAll')
-        .mockResolvedValue([
-          { numRounds: 4, intensity: 'Medium' } as WorkoutTemplate,
-        ]); // Fill in your mock exercises and workout templates here
+      jest.spyOn(workoutTemplateService, 'findAll').mockResolvedValue([
+        {
+          numRounds: 4,
+          numExercisesRound: 2,
+          intensity: 'Medium',
+          getTotalTime: () => 3600,
+        } as WorkoutTemplate,
+      ]); // Fill in your mock exercises and workout templates here
       const userPreferences: WorkoutModel = {
-        exercisesId: [1, 2, 3],
+        exercisesId: [1],
         duration: 1800,
         difficulty: 'Medium',
-        // ...
       };
 
       // Act
@@ -82,7 +99,13 @@ describe('WorkoutService', () => {
 
       // Assert
       expect(workout.duration).toBe(userPreferences.duration);
-      expect(workout.exercisesId).toContain(userPreferences.exercisesId[0]);
+      expect(workout.exercisesId.length).toEqual(4);
+      expect(workout.exercisesId).toEqual([
+        [1, 1],
+        [1, 1],
+        [1, 1],
+        [1, 1],
+      ]);
       // Add more expectations here as necessary
     });
 
