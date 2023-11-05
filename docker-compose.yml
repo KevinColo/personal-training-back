@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  nestjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: tail -f /dev/null  # Ajoutez cette ligne
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://${DB_USERNAME}:${DB_PASSWORD}@postgres-db:5432/${DB_NAME}
+    depends_on:
+      - postgres-db
+
+  postgres-db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

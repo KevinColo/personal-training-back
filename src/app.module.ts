@@ -25,11 +25,13 @@ import { WorkoutTemplatesService } from './workout-template/workout-templates.se
 import entities, { Exercise, Workout, WorkoutTemplate } from './index';
 import { User } from './users/user.entity';
 import { WorkoutTemplatesModule } from './workout-template/workout-templates.module';
+import { BlogModule } from './blog/blog.module';
 
 @Module({
   imports: [
-    UsersModule,
+    BlogModule,
     ExercisesModule,
+    UsersModule,
     WorkoutsModule,
     WorkoutTemplatesModule,
     ConfigModule.forRoot({ isGlobal: true }),

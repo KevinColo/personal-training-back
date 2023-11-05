@@ -22,6 +22,16 @@ export class Exercise {
 
   @Column()
   @IsNotEmpty()
+  @IsString()
+  public imgUrl: string;
+
+  @Column()
+  @IsNotEmpty()
+  @IsString()
+  public videoUrl: string;
+
+  @Column()
+  @IsNotEmpty()
   @IsIn(['Low', 'Medium', 'High'])
   public intensity: string;
 
@@ -37,6 +47,8 @@ export class Exercise {
     muscleGroup: string,
     intensity: string,
     difficulty: string,
+    imgUrl: string,
+    videoUrl: string,
   ) {
     this.id = id;
     this.name = name;
@@ -44,5 +56,7 @@ export class Exercise {
     this.muscleGroup = muscleGroup;
     this.intensity = intensity;
     this.difficulty = difficulty;
+    this.imgUrl = imgUrl;
+    this.videoUrl = videoUrl;
   }
 }

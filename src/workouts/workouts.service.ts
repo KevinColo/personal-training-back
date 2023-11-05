@@ -47,10 +47,9 @@ export class WorkoutsService {
     // Filter workout templates based on user's difficulty preference
 
     const filteredWorkoutTemplates: WorkoutTemplate[] =
-      allWorkoutTemplates.filter(
-        (workoutTemplate) =>
-          workoutTemplate.intensity === userPreferences.difficulty,
-      );
+      allWorkoutTemplates.filter((workoutTemplate) => {
+        return workoutTemplate.intensity === userPreferences.difficulty;
+      });
     // Choose random workout template
     const chosenWorkoutTemplate = this.chooseRandomItem(
       filteredWorkoutTemplates,

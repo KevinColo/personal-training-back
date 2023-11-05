@@ -20,8 +20,16 @@ export class ExercisesController {
   constructor(private readonly exercisesService: ExercisesService) {}
 
   @Get()
-  findAll(@Query() query): Promise<Exercise[]> {
-    const { muscleGroup, intensity, difficulty } = query;
+  async findAll(@Query() query): Promise<Exercise[]> {
+    const { muscleGroup, intensity, difficulty, ids } = query;
+
+    // Si les identifiants sont fournis, récupérer les exercices correspondants
+    if (ids) {
+      const idsArray = ids.split(',').map(Number);
+      return await this.exercisesService.findSome(idsArray);
+    }
+
+    // Sinon, récupérer tous les exercices en fonction des autres paramètres
     return this.exercisesService.findAll(muscleGroup, intensity, difficulty);
   }
 
